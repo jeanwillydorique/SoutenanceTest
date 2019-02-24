@@ -92,7 +92,7 @@ Vagrant.configure(2) do |config|
    sudo debconf-set-selections <<< "mysql-server mysql-server/root_password_again password 0000"
    apt-get install -y mysql-server &> /dev/null
    echo "Le mot de passe root de MySQL est : 0000 \n"
-   echo "Installation de PHP7.2 ...\n"
+   echo "Installation de PHP7.2 et des paquets...\n"
    sudo apt-get install -y php7.2 libapache2-mod-php7.2 php7.2-mysql php7.2-mbstring php7.2-dom &> /dev/null
    echo "Installation de composer...\n"
    sudo php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -103,16 +103,26 @@ Vagrant.configure(2) do |config|
    echo "Installation de l'application...\n"
    composer install
    composer update
+   echo "Configuration de l'application \n"
+   sudo rm index.html
    sudo mv .env-1.example .env
    sudo sed -i -e "s/.*DB_DATABASE=homestead.*/DB_DATABASE=LibraWill/g" .env
    sudo sed -i -e "s/.*DB_USERNAME=homestead.*/DB_USERNAME=root/g" .env
    sudo sed -i -e "s/.*DB_PASSWORD=secret.*/DB_PASSWORD=0000/g" .env
+   echo "Configuration du fichier envvars \n"
    sudo sed -i -e "s/.*export APACHE_RUN_USER=www-data.*/export APACHE_RUN_USER=vagrant/g"  /etc/apache2/envvars
    sudo sed -i -e "s/.*export APACHE_RUN_GROUP=www-data.*/export APACHE_RUN_GROUP=vagrant/g"  /etc/apache2/envvars
    sudo sed -i -e "s/.*export APACHE_RUN_GROUP=www-data.*/export APACHE_RUN_GROUP=vagrant/g"  /etc/apache2/envvars
+   echo "Configuration du fichier 000-default\n"
    sudo mv -f 000-default.conf /etc/apache2/sites-available/000-default.conf
+   echo "Activation des erreurs PHP"
+   sudo sed -i -e "s/.*export display_errors = Off.*/export display_errors = On/g"  /etc/php/7.2/apache2/php.ini 
+   sudo sed -i -e "s/.*export display_startup_errors = Off.*/export display_startup_errors = On/g"  /etc/php/7.2/apache2/php.ini
+   echo "Création de la base de données\n"
    mysql -uroot -p0000 -e "CREATE DATABASE LibraWill;"
+   echo "Création de la clé de sécurité \n"
    php artisan key:generate
+   echo "Migration et seed des données \n"
    php artisan migrate --seed
    echo "Redémarrage d'Apache...\n"
    sudo service apache2 restart
