@@ -103,11 +103,28 @@ Vagrant.configure(2) do |config|
    echo "Installation de l'application...\n"
    composer install
    composer update
-   mysql -uroot -p0000 -e "create database 'LibraWill'"
    sudo mv .env-1.example .env
    sudo sed -i -e "s/.*DB_DATABASE=homestead.*/DB_DATABASE=LibraWill/g" .env
    sudo sed -i -e "s/.*DB_USERNAME=homestead.*/DB_USERNAME=root/g" .env
    sudo sed -i -e "s/.*DB_PASSWORD=secret.*/DB_PASSWORD=0000/g" .env
+   sudo sed -i -e "s/.*export APACHE_RUN_USER=www-data.*/export APACHE_RUN_USER=vagrant/g"  /etc/apache2/envvars
+   sudo sed -i -e "s/.*export APACHE_RUN_GROUP=www-data.*/export APACHE_RUN_GROUP=vagrant/g"  /etc/apache2/envvars
+   sudo sed -i -e "s/.*export APACHE_RUN_GROUP=www-data.*/export APACHE_RUN_GROUP=vagrant/g"  /etc/apache2/envvars
+   sudo sed -i -e "s/.*export DocumentRoot /var/www/html/.*/export 
+   DocumentRoot /var/www/html/public/ 
+    \n
+    \n
+    <Directory /var/www/html>
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride All
+                Order allow,deny
+                allow from all
+    </Directory>
+    \n
+    \n
+    /g" /etc/apache2/sites-available/000-default.conf
+    mysql -uroot -p0000 -e "CREATE DATABASE LibraWill;"
+   php artisan key:generate
    php artisan migrate --seed
    echo "Redémarrage d'Apache...\n"
    sudo service apache2 restart
