@@ -26,7 +26,7 @@ Vagrant.configure(2) do |config|
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network "private_network", ip: "192.168.33.40"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
@@ -77,7 +77,7 @@ Vagrant.configure(2) do |config|
    echo "Mise à jour des paquets...\n"
    sudo add-apt-repository ppa:ondrej/php &> /dev/null
    sudo apt-get update &> /dev/null
-   cd /var/www/html
+   cd /var/www/html &> /dev/null
    echo "Installation d'Apache 2...\n"
    sudo apt-get install -y apache2 &>> /dev/null
    echo "Activation des modules Apache...\n"
@@ -103,6 +103,12 @@ Vagrant.configure(2) do |config|
    echo "Installation de l'application...\n"
    composer install
    composer update
+   mysql -uroot -p0000 -e "create database 'LibraWill'"
+   sudo mv .env-1.example .env
+   sudo sed -i -e "s/.*DB_DATABASE=homestead.*/DB_DATABASE=LibraWill/g" .env
+   sudo sed -i -e "s/.*DB_USERNAME=homestead.*/DB_USERNAME=root/g" .env
+   sudo sed -i -e "s/.*DB_PASSWORD=secret.*/DB_PASSWORD=0000/g" .env
+   php artisan migrate --seed
    echo "Redémarrage d'Apache...\n"
    sudo service apache2 restart
    echo "Installation terminée. Connectez-vous avec la commande vagrant ssh\n"
