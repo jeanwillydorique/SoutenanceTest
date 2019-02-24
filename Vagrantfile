@@ -110,20 +110,8 @@ Vagrant.configure(2) do |config|
    sudo sed -i -e "s/.*export APACHE_RUN_USER=www-data.*/export APACHE_RUN_USER=vagrant/g"  /etc/apache2/envvars
    sudo sed -i -e "s/.*export APACHE_RUN_GROUP=www-data.*/export APACHE_RUN_GROUP=vagrant/g"  /etc/apache2/envvars
    sudo sed -i -e "s/.*export APACHE_RUN_GROUP=www-data.*/export APACHE_RUN_GROUP=vagrant/g"  /etc/apache2/envvars
-   sudo sed -i -e "s/.*export DocumentRoot /var/www/html/.*/export 
-   DocumentRoot /var/www/html/public/ 
-    \n
-    \n
-    <Directory /var/www/html>
-                Options Indexes FollowSymLinks MultiViews
-                AllowOverride All
-                Order allow,deny
-                allow from all
-    </Directory>
-    \n
-    \n
-    /g" /etc/apache2/sites-available/000-default.conf
-    mysql -uroot -p0000 -e "CREATE DATABASE LibraWill;"
+   sudo mv -f 000-default.conf /etc/apache2/sites-available/000-default.conf
+   mysql -uroot -p0000 -e "CREATE DATABASE LibraWill;"
    php artisan key:generate
    php artisan migrate --seed
    echo "Redémarrage d'Apache...\n"
@@ -131,3 +119,4 @@ Vagrant.configure(2) do |config|
    echo "Installation terminée. Connectez-vous avec la commande vagrant ssh\n"
   SHELL
 end
+
